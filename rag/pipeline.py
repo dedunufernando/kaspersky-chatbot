@@ -1,18 +1,18 @@
 """
-RAG pipeline: query → retrieve → generate with Claude Sonnet 4.6.
-Uses prompt caching to reduce API costs on repeated system prompts.
+RAG pipeline: query → retrieve → generate with Groq (free LLM).
+Supports multi-turn conversation with context-aware retrieval.
 """
 import sys
 from pathlib import Path
 from typing import Generator
 
-import anthropic
+from groq import Groq
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from config import ANTHROPIC_API_KEY, LLM_MODEL, CONFIDENCE_THRESHOLD
+from config import GROQ_API_KEY, LLM_MODEL
 from rag.retriever import retrieve, Chunk
 
-claude = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+groq_client = Groq(api_key=GROQ_API_KEY)
 
 SYSTEM_PROMPT = """You are a Kaspersky-certified support expert assistant.
 
@@ -23,7 +23,8 @@ Rules you must follow without exception:
 4. If a step involves a potentially risky action (registry edit, uninstall, disabling a feature), add a safety warning before that step.
 5. NEVER suggest disabling real-time protection or the antivirus engine.
 6. If the retrieved documents do not clearly answer the question, say exactly: "I could not find a verified answer in the official Kaspersky knowledge base. Please contact Kaspersky support directly: https://support.kaspersky.com"
-7. Keep answers concise but complete. Use markdown formatting."""
+7. For follow-up messages like "i did those steps", "it didn't work", "still not working" — refer back to the conversation context and suggest the next troubleshooting step.
+8. Keep answers concise but complete. Use markdown formatting."""
 
 
 def _build_context(chunks: list[Chunk]) -> str:
@@ -39,52 +40,75 @@ def _build_context(chunks: list[Chunk]) -> str:
     return "\n\n".join(parts)
 
 
+def _build_retrieval_query(query: str, history: list[dict] | None) -> str:
+    """
+    For short follow-up messages, combine with recent history
+    so the retriever has enough context to find relevant chunks.
+    e.g. "i did those steps" + previous "Kaspersky won't update" → better search
+    """
+    SHORT_QUERY_THRESHOLD = 10  # words
+    if len(query.split()) >= SHORT_QUERY_THRESHOLD:
+        return query  # long enough, use as-is
+
+    if not history:
+        return query
+
+    # Grab last user message from history for context
+    recent_user_msgs = [
+        m["content"] for m in history[-6:]
+        if m["role"] == "user"
+    ]
+    if recent_user_msgs:
+        # Combine last user message with current query
+        combined = f"{recent_user_msgs[-1]} {query}"
+        return combined
+
+    return query
+
+
 def ask(query: str, history: list[dict] | None = None) -> Generator[str, None, None]:
     """
     Stream a response. Yields text chunks.
     history: list of {"role": "user"|"assistant", "content": str}
     """
-    chunks = retrieve(query)
+    # Use context-aware query for retrieval
+    retrieval_query = _build_retrieval_query(query, history)
+    chunks = retrieve(retrieval_query)
 
-    # No confident results → escalate immediately
-    if not chunks:
-        yield (
-            "I could not find a verified answer in the official Kaspersky knowledge base. "
-            "Please contact Kaspersky support directly: https://support.kaspersky.com"
-        )
-        return
+    # Build messages for LLM
+    messages: list[dict] = [{"role": "system", "content": SYSTEM_PROMPT}]
 
-    context = _build_context(chunks)
-
-    messages: list[dict] = []
-
-    # Inject conversation history (last 6 turns max to keep context tight)
+    # Inject conversation history (last 6 turns for context)
     if history:
         messages.extend(history[-6:])
 
-    messages.append({
-        "role": "user",
-        "content": (
-            f"<retrieved_documents>\n{context}\n</retrieved_documents>\n\n"
-            f"User question: {query}"
-        ),
-    })
+    if chunks:
+        context = _build_context(chunks)
+        messages.append({
+            "role": "user",
+            "content": (
+                f"<retrieved_documents>\n{context}\n</retrieved_documents>\n\n"
+                f"User question: {query}"
+            ),
+        })
+    else:
+        # No KB results — still pass the question with history, LLM will use rule 7
+        messages.append({
+            "role": "user",
+            "content": query,
+        })
 
-    # Use prompt caching on the system prompt (saves ~80% on repeated calls)
-    with claude.messages.stream(
+    stream = groq_client.chat.completions.create(
         model=LLM_MODEL,
-        max_tokens=1024,
-        system=[
-            {
-                "type": "text",
-                "text": SYSTEM_PROMPT,
-                "cache_control": {"type": "ephemeral"},
-            }
-        ],
         messages=messages,
-    ) as stream:
-        for text in stream.text_stream:
-            yield text
+        max_tokens=1024,
+        stream=True,
+    )
+
+    for chunk in stream:
+        delta = chunk.choices[0].delta.content
+        if delta:
+            yield delta
 
 
 def ask_sync(query: str, history: list[dict] | None = None) -> str:

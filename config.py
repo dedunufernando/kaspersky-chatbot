@@ -3,8 +3,7 @@ import os
 
 load_dotenv()
 
-ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
-OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+GROQ_API_KEY = os.environ["GROQ_API_KEY"]
 DATABASE_URL = os.environ["DATABASE_URL"]
 
 # Crawler
@@ -16,7 +15,7 @@ RETRIEVAL_TOP_K = int(os.getenv("RETRIEVAL_TOP_K", "5"))
 CONFIDENCE_THRESHOLD = float(os.getenv("CONFIDENCE_THRESHOLD", "0.75"))
 
 # Models
-LLM_MODEL = "claude-sonnet-4-6"
+LLM_MODEL = "llama-3.3-70b-versatile"   # free via Groq
 EMBEDDING_MODEL = "all-mpnet-base-v2"   # free local model via sentence-transformers
 EMBEDDING_DIMENSIONS = 768
 
