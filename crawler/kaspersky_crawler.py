@@ -7,7 +7,6 @@ Handles help.kaspersky.com iframe-based help system.
 import asyncio
 import json
 import re
-import time
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
@@ -23,8 +22,9 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 ALLOWED_DOMAINS = {"support.kaspersky.com", "help.kaspersky.com"}
 SKIP_PATTERNS = [
-    "/forum/", "/community/", "/download/", "/news/",
-    ".pdf", ".zip", ".exe", ".msi", ".png", ".jpg",
+    "/forum/", "/community/", "/download/",
+    ".pdf", ".zip", ".exe", ".msi", ".png", ".jpg", ".gif", ".svg",
+    "?lang=", "javascript:", "mailto:",
 ]
 
 HEADERS = {
@@ -45,7 +45,8 @@ def _is_allowed(url: str) -> bool:
     parsed = urlparse(url)
     if parsed.netloc not in ALLOWED_DOMAINS:
         return False
-    return not any(p in url for p in SKIP_PATTERNS)
+    path = parsed.path.lower()
+    return not any(p in path for p in SKIP_PATTERNS)
 
 
 def _extract_metadata(soup: BeautifulSoup, url: str) -> dict:
@@ -133,6 +134,18 @@ async def _fetch_with_playwright(page, url: str, delay: float) -> str | None:
         return None
 
 
+def _collect_links(soup: BeautifulSoup, base_url: str,
+                   visited: set, queue: list) -> None:
+    """Extract and queue all valid in-domain links from a parsed page."""
+    for a in soup.find_all("a", href=True):
+        href = a["href"].strip()
+        if not href or href.startswith(("javascript:", "mailto:", "#")):
+            continue
+        full = urljoin(base_url, href).split("#")[0].split("?")[0]
+        if full not in visited and _is_allowed(full) and full not in queue:
+            queue.append(full)
+
+
 async def crawl(seed_urls: list[str], max_pages: int, delay: float) -> None:
     visited: set[str] = set()
     queue: list[str] = list(seed_urls)
@@ -187,6 +200,19 @@ async def crawl(seed_urls: list[str], max_pages: int, delay: float) -> None:
 
                 console.print(f"[dim]  → {len(content)} chars extracted[/dim]")
 
+                # Always collect links from the parsed soup (works for both paths)
+                _collect_links(soup, url, visited, queue)
+
+                # Also collect links from Playwright frames if we used it
+                if html and len(content) >= 150:
+                    for frame in page.frames[1:]:  # skip main frame (already in soup)
+                        try:
+                            frame_html = await frame.content()
+                            frame_soup = BeautifulSoup(frame_html, "lxml")
+                            _collect_links(frame_soup, url, visited, queue)
+                        except Exception:
+                            continue
+
                 if len(content) < 150:
                     console.print("[yellow]  Too short, skipping[/yellow]")
                     continue
@@ -213,20 +239,6 @@ async def crawl(seed_urls: list[str], max_pages: int, delay: float) -> None:
                 saved += 1
                 progress.advance(task)
                 console.print(f"[green]✓ [{saved}][/green] {meta['title'][:70]}")
-
-                # Collect links from page + all frames
-                for frame in [page] + list(page.frames):
-                    try:
-                        frame_html = (await frame.content()
-                                      if hasattr(frame, 'content')
-                                      else "")
-                        frame_soup = BeautifulSoup(frame_html, "lxml")
-                        for a in frame_soup.find_all("a", href=True):
-                            href = urljoin(url, a["href"]).split("#")[0]
-                            if href not in visited and _is_allowed(href):
-                                queue.append(href)
-                    except Exception:
-                        continue
 
                 await asyncio.sleep(delay)
 

@@ -23,48 +23,55 @@ EMBEDDING_DIMENSIONS = 768
 CHUNK_SIZE = 400
 CHUNK_OVERLAP = 50
 
-# Kaspersky KB seed URLs — consumer + enterprise
+# Kaspersky KB seed URLs — section-level pages that link to many real articles
+# The crawler follows links, so seeding section/product pages gives 100s of articles.
 KB_SEED_URLS = [
-    # ── Kaspersky Security Center KB articles ─────────────────────────
-    "https://support.kaspersky.com/KSC/14.2/en-US/3438.htm",
-    "https://support.kaspersky.com/KSC/14.2/en-US/175848.htm",
-    "https://support.kaspersky.com/KSC/14.2/en-US/180025.htm",
-    "https://support.kaspersky.com/KSC/14.2/en-US/199717.htm",
-    "https://support.kaspersky.com/KSC/14.2/en-US/158631.htm",
+    # ── Kaspersky Security Center 14 / 15 ────────────────────────────
+    "https://support.kaspersky.com/KSC/14.2/en-US/3438.htm",       # What's new
+    "https://support.kaspersky.com/KSC/14.2/en-US/175848.htm",     # Architecture
+    "https://support.kaspersky.com/KSC/14.2/en-US/180025.htm",     # Deployment
+    "https://support.kaspersky.com/KSC/14.2/en-US/199717.htm",     # Device control
+    "https://support.kaspersky.com/KSC/14.2/en-US/158631.htm",     # Network Agent
+    "https://support.kaspersky.com/KSC/14.2/en-US/204152.htm",     # Policy config
+    "https://support.kaspersky.com/KSC/14.2/en-US/166716.htm",     # Troubleshooting
+    "https://support.kaspersky.com/KSC/14.2/en-US/209017.htm",     # KSC Web Console
+    "https://support.kaspersky.com/KSC/14.2/en-US/3479.htm",       # Reports & stats
+    "https://support.kaspersky.com/KSC/14.2/en-US/189572.htm",     # Update issues
 
-    # ── KES Windows KB articles ───────────────────────────────────────
-    "https://support.kaspersky.com/KES12Windows/en-US/127971.htm",
-    "https://support.kaspersky.com/KES12Windows/en-US/176981.htm",
-    "https://support.kaspersky.com/KES12Windows/en-US/131690.htm",
+    # ── Kaspersky Endpoint Security 12 for Windows ───────────────────
+    "https://support.kaspersky.com/KES12Windows/en-US/127971.htm",  # Main page
+    "https://support.kaspersky.com/KES12Windows/en-US/176981.htm",  # Device Control
+    "https://support.kaspersky.com/KES12Windows/en-US/131690.htm",  # Firewall
+    "https://support.kaspersky.com/KES12Windows/en-US/128893.htm",  # App Control
+    "https://support.kaspersky.com/KES12Windows/en-US/134892.htm",  # Encryption
+    "https://support.kaspersky.com/KES12Windows/en-US/136947.htm",  # Troubleshoot
+    "https://support.kaspersky.com/KES12Windows/en-US/173987.htm",  # Network
+    "https://support.kaspersky.com/KES12Windows/en-US/130879.htm",  # Policies
 
-    # ── General KB articles (work reliably) ───────────────────────────
-    "https://support.kaspersky.com/us/13697",
-    "https://support.kaspersky.com/us/14459",
-    "https://support.kaspersky.com/us/15820",
-    "https://support.kaspersky.com/us/15908",
-    "https://support.kaspersky.com/us/16025",
-    "https://support.kaspersky.com/us/14411",
-    "https://support.kaspersky.com/us/13232",
-    "https://support.kaspersky.com/us/14448",
-    "https://support.kaspersky.com/us/15824",
-    "https://support.kaspersky.com/us/13520",
-    "https://support.kaspersky.com/us/14612",
-    "https://support.kaspersky.com/us/15661",
-    "https://support.kaspersky.com/us/13697",
-    "https://support.kaspersky.com/us/14556",
-    "https://support.kaspersky.com/us/16093",
-    "https://support.kaspersky.com/us/14362",
-    "https://support.kaspersky.com/us/15887",
-    "https://support.kaspersky.com/us/15912",
-    "https://support.kaspersky.com/us/16212",
-    "https://support.kaspersky.com/us/13741",
-    "https://support.kaspersky.com/us/15736",
-    "https://support.kaspersky.com/us/14560",
-    "https://support.kaspersky.com/us/16111",
-    "https://support.kaspersky.com/us/15964",
-    "https://support.kaspersky.com/us/16313",
+    # ── KES for Linux ────────────────────────────────────────────────
+    "https://support.kaspersky.com/KESLinux/12.1/en-US/197912.htm",
+    "https://support.kaspersky.com/KESLinux/12.1/en-US/197929.htm",
+    "https://support.kaspersky.com/KESLinux/12.1/en-US/197938.htm",
 
-    # ── Consumer product KB ───────────────────────────────────────────
-    "https://support.kaspersky.com/us/consumer/17005",
-    "https://support.kaspersky.com/us/consumer/16998",
+    # ── Kaspersky Standard / Plus / Premium (consumer) ───────────────
+    "https://support.kaspersky.com/KAVWin/21.18/en-US/",
+    "https://support.kaspersky.com/KSOS/21.18/en-US/",
+
+    # ── Kaspersky VPN ────────────────────────────────────────────────
+    "https://support.kaspersky.com/VPN/Win5.x/en-US/",
+
+    # ── Kaspersky Safe Kids ───────────────────────────────────────────
+    "https://support.kaspersky.com/SafeKids/2.x/en-US/",
+
+    # ── General support search results (link-rich pages) ─────────────
+    "https://support.kaspersky.com/us/search?query=network+agent&lang=en",
+    "https://support.kaspersky.com/us/search?query=device+control&lang=en",
+    "https://support.kaspersky.com/us/search?query=installation+error&lang=en",
+    "https://support.kaspersky.com/us/search?query=update+failed&lang=en",
+    "https://support.kaspersky.com/us/search?query=kaspersky+security+center&lang=en",
+    "https://support.kaspersky.com/us/search?query=endpoint+security&lang=en",
+    "https://support.kaspersky.com/us/search?query=policy+not+applied&lang=en",
+    "https://support.kaspersky.com/us/search?query=klmover&lang=en",
+    "https://support.kaspersky.com/us/search?query=activation+code&lang=en",
+    "https://support.kaspersky.com/us/search?query=license+expired&lang=en",
 ]
