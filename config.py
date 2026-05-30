@@ -25,43 +25,46 @@ CHUNK_OVERLAP = 50
 
 # Kaspersky KB seed URLs — consumer + enterprise
 KB_SEED_URLS = [
-    # ── Kaspersky Security Center (KSC) ──────────────────────────────
-    "https://help.kaspersky.com/KSC/14.2/en-US/3438.htm",
-    "https://help.kaspersky.com/KSC/14.2/en-US/175848.htm",
-    "https://help.kaspersky.com/KSC/14.2/en-US/180025.htm",
-    "https://help.kaspersky.com/KSC/14.2/en-US/198653.htm",
-    "https://help.kaspersky.com/KSC/14.2/en-US/199717.htm",
+    # ── Kaspersky Security Center KB articles ─────────────────────────
+    "https://support.kaspersky.com/KSC/14.2/en-US/3438.htm",
+    "https://support.kaspersky.com/KSC/14.2/en-US/175848.htm",
+    "https://support.kaspersky.com/KSC/14.2/en-US/180025.htm",
+    "https://support.kaspersky.com/KSC/14.2/en-US/199717.htm",
+    "https://support.kaspersky.com/KSC/14.2/en-US/158631.htm",
 
-    # ── KES for Windows 12 ───────────────────────────────────────────
-    "https://help.kaspersky.com/KES12/en-US/176981.htm",
-    "https://help.kaspersky.com/KES12/en-US/127971.htm",
-    "https://help.kaspersky.com/KES12/en-US/176997.htm",
-    "https://help.kaspersky.com/KES12/en-US/131690.htm",
-    "https://help.kaspersky.com/KES12/en-US/176998.htm",
+    # ── KES Windows KB articles ───────────────────────────────────────
+    "https://support.kaspersky.com/KES12Windows/en-US/127971.htm",
+    "https://support.kaspersky.com/KES12Windows/en-US/176981.htm",
+    "https://support.kaspersky.com/KES12Windows/en-US/131690.htm",
 
-    # ── KES for Linux ────────────────────────────────────────────────
-    "https://help.kaspersky.com/KES4Linux/12/en-US/197739.htm",
-    "https://help.kaspersky.com/KES4Linux/12/en-US/197745.htm",
-    "https://help.kaspersky.com/KES4Linux/12/en-US/206503.htm",
-    "https://help.kaspersky.com/KES4Linux/12/en-US/199285.htm",
-
-    # ── Network Agent ────────────────────────────────────────────────
-    "https://help.kaspersky.com/KSC/14.2/en-US/158631.htm",
-    "https://help.kaspersky.com/KSC/14.2/en-US/158634.htm",
-
-    # ── Device Control / USB Block ───────────────────────────────────
-    "https://help.kaspersky.com/KES12/en-US/131690.htm",
-    "https://help.kaspersky.com/KES4Linux/12/en-US/199289.htm",
-
-    # ── Consumer products ────────────────────────────────────────────
-    "https://help.kaspersky.com/KasperskyStandardPlusPremium/en-US/195909.htm",
-    "https://help.kaspersky.com/KasperskyStandardPlusPremium/en-US/196283.htm",
-    "https://help.kaspersky.com/VPN/Win/en-US/what-is-kaspersky-vpn.htm",
-    "https://help.kaspersky.com/KSAndroid/en-US/153139.htm",
-
-    # ── KB / support articles ────────────────────────────────────────
-    "https://support.kaspersky.com/us/14459",
+    # ── General KB articles (work reliably) ───────────────────────────
     "https://support.kaspersky.com/us/13697",
+    "https://support.kaspersky.com/us/14459",
     "https://support.kaspersky.com/us/15820",
-    "https://support.kaspersky.com/KSC/14.2/en-US/",
+    "https://support.kaspersky.com/us/15908",
+    "https://support.kaspersky.com/us/16025",
+    "https://support.kaspersky.com/us/14411",
+    "https://support.kaspersky.com/us/13232",
+    "https://support.kaspersky.com/us/14448",
+    "https://support.kaspersky.com/us/15824",
+    "https://support.kaspersky.com/us/13520",
+    "https://support.kaspersky.com/us/14612",
+    "https://support.kaspersky.com/us/15661",
+    "https://support.kaspersky.com/us/13697",
+    "https://support.kaspersky.com/us/14556",
+    "https://support.kaspersky.com/us/16093",
+    "https://support.kaspersky.com/us/14362",
+    "https://support.kaspersky.com/us/15887",
+    "https://support.kaspersky.com/us/15912",
+    "https://support.kaspersky.com/us/16212",
+    "https://support.kaspersky.com/us/13741",
+    "https://support.kaspersky.com/us/15736",
+    "https://support.kaspersky.com/us/14560",
+    "https://support.kaspersky.com/us/16111",
+    "https://support.kaspersky.com/us/15964",
+    "https://support.kaspersky.com/us/16313",
+
+    # ── Consumer product KB ───────────────────────────────────────────
+    "https://support.kaspersky.com/us/consumer/17005",
+    "https://support.kaspersky.com/us/consumer/16998",
 ]
